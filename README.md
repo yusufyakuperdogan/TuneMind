@@ -31,7 +31,7 @@ TuneMind detects your emotion from text and plays a matching song from Deezer.
 
 ### 1. Clone the repository
 ```
-git clone https://github.com/60yusuf60/TuneMind.git
+git clone https://github.com/yusufyakuperdogan/TuneMind.git
 ```
 
 ### 2. Install dependencies
