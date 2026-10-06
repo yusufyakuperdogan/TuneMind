@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from services.music_service import get_song_by_emotion
+from services.music_service import get_song_by_emotion, get_song_from_playlist
 from services.emotion_service import detect_emotion
 
 router = APIRouter()
@@ -23,7 +23,10 @@ class EmotionResponse(BaseModel):
 def analyze_emotion(request: EmotionRequest):
     text = request.text
     emotion = detect_emotion(text)
-    song = get_song_by_emotion(emotion)
+    song = get_song_from_playlist(emotion)
+    # No playlist song (e.g. Deezer error): fall back to title search
+    if not song.get("track_id"):
+        song = get_song_by_emotion(emotion)
     return {
         "text": text,
         "emotion": emotion,
