@@ -258,6 +258,40 @@
             100% { transform: translateY(0); opacity: 1; }
         }
 
+        /* Song name + artist under the player */
+        .song-info {
+            margin-top: 14px;
+            animation: slideUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .song-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            overflow-wrap: anywhere;
+        }
+
+        .song-artist {
+            margin-top: 2px;
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.6);
+            overflow-wrap: anywhere;
+        }
+
+        /* "Another song" button: outlined version of the main button */
+        .another-btn {
+            margin-top: 16px;
+            padding: 11px;
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.25);
+            font-size: 0.9rem;
+        }
+
+        .another-btn:hover {
+            border-color: #7c3aed;
+            box-shadow: 0 8px 30px rgba(124, 58, 237, 0.25);
+        }
+
         /* Loading dots */
         .loading {
             margin-top: 24px;
