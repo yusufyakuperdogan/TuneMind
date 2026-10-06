@@ -24,12 +24,19 @@ finally:
     if _real_emotion_service is None:
         sys.modules.pop("services.emotion_service", None)
 
-FAKE_SONG = {
-    "name": "Test Song",
-    "artist": "Test Artist",
-    "url": "https://www.deezer.com/track/12345",
-    "track_id": "12345",
+PLAYLIST_SONG = {
+    "name": "Playlist Song",
+    "artist": "Playlist Artist",
+    "url": "https://www.deezer.com/track/111",
+    "track_id": "111",
 }
+SEARCH_SONG = {
+    "name": "Search Song",
+    "artist": "Search Artist",
+    "url": "https://www.deezer.com/track/222",
+    "track_id": "222",
+}
+NO_SONG = {"name": "No song found", "artist": "", "url": "", "track_id": ""}
 
 
 @pytest.fixture
@@ -39,33 +46,70 @@ def client():
 
 @pytest.fixture
 def calls(monkeypatch):
-    """Mock both services and record how they were called."""
-    recorded = {"detect_emotion": [], "get_song_by_emotion": []}
+    """Mock all services and record how they were called.
+
+    Set calls["playlist_result"] / calls["search_result"] in a test to change
+    what the fake music functions return.
+    """
+    recorded = {
+        "detect_emotion": [],
+        "get_song_from_playlist": [],
+        "get_song_by_emotion": [],
+        "playlist_result": PLAYLIST_SONG,
+        "search_result": SEARCH_SONG,
+    }
 
     def fake_detect_emotion(text):
         recorded["detect_emotion"].append(text)
         return "happy"
 
+    def fake_get_song_from_playlist(emotion):
+        recorded["get_song_from_playlist"].append(emotion)
+        return dict(recorded["playlist_result"])
+
     def fake_get_song_by_emotion(emotion):
         recorded["get_song_by_emotion"].append(emotion)
-        return dict(FAKE_SONG)
+        return dict(recorded["search_result"])
 
     monkeypatch.setattr(emotion_routes, "detect_emotion", fake_detect_emotion)
+    monkeypatch.setattr(emotion_routes, "get_song_from_playlist", fake_get_song_from_playlist)
     monkeypatch.setattr(emotion_routes, "get_song_by_emotion", fake_get_song_by_emotion)
     return recorded
 
 
-def test_post_emotion_returns_text_emotion_and_song(client, calls):
+def test_post_emotion_returns_playlist_song(client, calls):
     response = client.post("/emotion/", json={"text": "I feel great today!"})
 
     assert response.status_code == 200
     assert response.json() == {
         "text": "I feel great today!",
         "emotion": "happy",
-        "song": FAKE_SONG,
+        "song": PLAYLIST_SONG,
     }
     assert calls["detect_emotion"] == ["I feel great today!"]
+    assert calls["get_song_from_playlist"] == ["happy"]
+    assert calls["get_song_by_emotion"] == []  # no fallback needed
+
+
+def test_post_emotion_falls_back_to_search_when_playlist_has_no_song(client, calls):
+    calls["playlist_result"] = NO_SONG
+
+    response = client.post("/emotion/", json={"text": "I feel great today!"})
+
+    assert response.status_code == 200
+    assert response.json()["song"] == SEARCH_SONG
+    assert calls["get_song_from_playlist"] == ["happy"]
     assert calls["get_song_by_emotion"] == ["happy"]
+
+
+def test_post_emotion_returns_no_song_when_both_fail(client, calls):
+    calls["playlist_result"] = NO_SONG
+    calls["search_result"] = NO_SONG
+
+    response = client.post("/emotion/", json={"text": "I feel great today!"})
+
+    assert response.status_code == 200
+    assert response.json()["song"] == NO_SONG
 
 
 def test_post_emotion_without_text_returns_422(client, calls):
@@ -74,4 +118,5 @@ def test_post_emotion_without_text_returns_422(client, calls):
     assert response.status_code == 422
     assert any(err["loc"][-1] == "text" for err in response.json()["detail"])
     assert calls["detect_emotion"] == []
+    assert calls["get_song_from_playlist"] == []
     assert calls["get_song_by_emotion"] == []
