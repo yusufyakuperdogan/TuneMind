@@ -2,10 +2,17 @@ const analyzeBtn = document.getElementById("analyzeBtn");
 const textInput = document.getElementById("textInput");
 const resultDiv = document.getElementById("result");
 
-analyzeBtn.addEventListener("click", async () => {
+// The text from the last analysis, re-sent by the "Another song" button
+let lastText = "";
+
+analyzeBtn.addEventListener("click", () => {
     const text = textInput.value.trim();
     if (!text) return alert("Please enter how you feel!");
+    fetchSong(text);
+});
 
+async function fetchSong(text) {
+    lastText = text;
     resultDiv.innerHTML = `<p class="loading">Analyzing your mood... 🎵</p>`;
     analyzeBtn.disabled = true;
 
@@ -21,9 +28,10 @@ analyzeBtn.addEventListener("click", async () => {
         const data = await response.json();
 
         if (data.song && data.song.track_id) {
+            const emotion = escapeHtml(data.emotion.toLowerCase());
             resultDiv.innerHTML = `
-                <span class="emotion-badge ${data.emotion.toLowerCase()}">
-                    ${getEmotionEmoji(data.emotion)} ${data.emotion}
+                <span class="emotion-badge ${emotion}">
+                    ${getEmotionEmoji(data.emotion)} ${emotion}
                 </span>
                 <div class="player-wrapper">
                     <iframe
@@ -37,7 +45,13 @@ analyzeBtn.addEventListener("click", async () => {
                         loading="lazy">
                     </iframe>
                 </div>
+                <div class="song-info">
+                    <p class="song-name">${escapeHtml(data.song.name)}</p>
+                    <p class="song-artist">${escapeHtml(data.song.artist)}</p>
+                </div>
+                <button id="anotherBtn" class="another-btn">🔄 Another song</button>
             `;
+            document.getElementById("anotherBtn").addEventListener("click", () => fetchSong(lastText));
         } else {
             resultDiv.innerHTML = `<p class="error">No song found for this emotion. Try again!</p>`;
         }
@@ -47,7 +61,17 @@ analyzeBtn.addEventListener("click", async () => {
     } finally {
         analyzeBtn.disabled = false;
     }
-});
+}
+
+// Make text from the API safe to put inside HTML
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
 
 function getEmotionEmoji(emotion) {
     const emojis = {
