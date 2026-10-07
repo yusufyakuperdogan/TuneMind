@@ -1,9 +1,17 @@
 import json
 import random
+import threading
 import urllib.parse
 import urllib.request
+from collections import deque
 
 DEEZER_SEARCH_URL = "https://api.deezer.com/search"
+
+# Track IDs returned most recently (shared across all emotions), so the same
+# song isn't suggested again right away. In-memory only: resets on restart.
+RECENT_LIMIT = 20
+_recent_track_ids = deque(maxlen=RECENT_LIMIT)
+_recent_lock = threading.Lock()
 
 EMOTION_QUERIES = {
     "happy": [
@@ -71,7 +79,12 @@ def get_song_by_emotion(emotion: str) -> dict:
     if not tracks:
         return dict(NO_SONG)
 
-    track = random.choice(tracks)
+    with _recent_lock:
+        fresh = [t for t in tracks if str(t.get("id", "")) not in _recent_track_ids]
+        # If every result was returned recently, fall back to any of them
+        track = random.choice(fresh or tracks)
+        _recent_track_ids.append(str(track.get("id", "")))
+
     return {
         "name": track.get("title", ""),
         "artist": track.get("artist", {}).get("name", ""),
