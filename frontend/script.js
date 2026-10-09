@@ -2,6 +2,9 @@ const analyzeBtn = document.getElementById("analyzeBtn");
 const textInput = document.getElementById("textInput");
 const resultDiv = document.getElementById("result");
 
+const UNREACHABLE_MESSAGE = "Can't reach the server. Is the backend running?";
+const GENERIC_ERROR_MESSAGE = "Something went wrong, please try again.";
+
 // The text from the last analysis, re-sent by the "Another song" button
 let lastText = "";
 
@@ -17,13 +20,27 @@ async function fetchSong(text) {
     analyzeBtn.disabled = true;
 
     try {
-        const response = await fetch("http://127.0.0.1:8000/emotion/", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ text })
-        });
+        let response;
+        try {
+            response = await fetch("http://127.0.0.1:8000/emotion/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ text })
+            });
+        } catch (err) {
+            // fetch only throws when no response arrived at all (server down, network error)
+            console.error(err);
+            showError(UNREACHABLE_MESSAGE);
+            return;
+        }
+
+        if (!response.ok) {
+            console.error(`Backend returned ${response.status} ${response.statusText}`);
+            showError(GENERIC_ERROR_MESSAGE);
+            return;
+        }
 
         const data = await response.json();
 
@@ -56,11 +73,16 @@ async function fetchSong(text) {
             resultDiv.innerHTML = `<p class="error">No song found for this emotion. Try again!</p>`;
         }
     } catch (err) {
-        resultDiv.innerHTML = `<p class="error">Error connecting to backend. Make sure the server is running!</p>`;
+        // Anything else unexpected, e.g. a response that isn't valid JSON
         console.error(err);
+        showError(GENERIC_ERROR_MESSAGE);
     } finally {
         analyzeBtn.disabled = false;
     }
+}
+
+function showError(message) {
+    resultDiv.innerHTML = `<p class="error">${escapeHtml(message)}</p>`;
 }
 
 // Make text from the API safe to put inside HTML
