@@ -1,3 +1,5 @@
+import re
+
 from transformers import pipeline
 
 """
@@ -21,11 +23,22 @@ EMOTION_MAP = {
     "neutral": "neutral"
 }
 
+# A "neutral" result becomes "relaxed" when the text contains one of these
+# (whole words/phrases, case-insensitive).
+CALM_WORDS = ["calm", "peaceful", "relaxed", "chill", "quiet", "cozy", "sleepy", "at ease"]
+CALM_PATTERN = re.compile(
+    r"\b(" + "|".join(re.escape(w).replace(r"\ ", r"\s+") for w in CALM_WORDS) + r")\b",
+    re.IGNORECASE
+)
+
 def detect_emotion(message: str) -> str:
     try:
         result = emotion_classifier(message)
         label = result[0][0]["label"].lower()
-        return EMOTION_MAP.get(label, "neutral")
+        emotion = EMOTION_MAP.get(label, "neutral")
+        if emotion == "neutral" and CALM_PATTERN.search(message):
+            return "relaxed"
+        return emotion
     except Exception as e:
         print("Emotion detection error:", e)
         return "neutral"

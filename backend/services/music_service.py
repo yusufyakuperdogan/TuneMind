@@ -35,6 +35,13 @@ EMOTION_QUERIES = {
         "hard rock energy",
         "punk rock rage"
     ],
+    "relaxed": [
+        "peaceful piano",
+        "relaxing guitar",
+        "chill acoustic",
+        "cozy coffee jazz",
+        "sunday morning chill"
+    ],
     "neutral": [
         "chill ambient relaxing",
         "lofi hip hop study",
