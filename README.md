@@ -1,5 +1,7 @@
 # 🎵 TuneMind - Emotion Music
 
+[![tests](https://github.com/yusufyakuperdogan/TuneMind/actions/workflows/tests.yml/badge.svg)](https://github.com/yusufyakuperdogan/TuneMind/actions/workflows/tests.yml)
+
 TuneMind detects your emotion from text and plays a matching song from Deezer.
 
 ## Screenshots
