@@ -33,6 +33,9 @@ CALM_PATTERN = re.compile(
 )
 
 def detect_emotion(message: str) -> str:
+    # Nothing to analyze: skip the model (it guesses e.g. "fear" for "   ")
+    if not message or not message.strip():
+        return "neutral"
     try:
         result = emotion_classifier(message)
         label = result[0][0]["label"].lower()
