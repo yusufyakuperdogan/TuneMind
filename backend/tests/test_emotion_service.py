@@ -10,8 +10,6 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 import services.emotion_service as emotion_service  # noqa: E402
 from services.emotion_service import detect_emotion  # noqa: E402
 
-VALID_EMOTIONS = {"happy", "sad", "angry", "relaxed", "neutral"}
-
 
 @pytest.mark.parametrize(
     "text, expected",
@@ -27,8 +25,8 @@ def test_detect_emotion(text, expected):
     assert detect_emotion(text) == expected
 
 
-def test_empty_string_returns_valid_emotion():
-    assert detect_emotion("") in VALID_EMOTIONS
+def test_empty_string_returns_neutral():
+    assert detect_emotion("") == "neutral"
 
 
 def test_whitespace_returns_neutral_without_calling_model(monkeypatch):
