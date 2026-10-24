@@ -21,7 +21,7 @@ EMOTION_QUERIES = {
         "lonely night"
     ],
     "angry": [
-        "angry rock metal",
+        "heavy metal rage",
         "intense workout",
         "aggressive hip hop",
         "hard rock energy",
