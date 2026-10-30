@@ -34,7 +34,7 @@ git clone https://github.com/60yusuf60/TuneMind.git
 
 ### 2. Install dependencies
 ```
-pip install fastapi uvicorn sqlalchemy transformers torch
+pip install -r requirements.txt
 ```
 
 ### 3. Run the backend
