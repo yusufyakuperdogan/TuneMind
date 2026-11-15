@@ -2,7 +2,7 @@ from transformers import pipeline
 
 """
 Uses a pre-trained Hugging Face model to detect emotions from text.
-Detected emotions are mapped to Spotify-friendly categories to fetch the perfect song.
+Detected emotions are mapped to music search categories to fetch the perfect song.
 """
 
 emotion_classifier = pipeline(
