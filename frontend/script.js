@@ -27,11 +27,13 @@ analyzeBtn.addEventListener("click", async () => {
                 </span>
                 <div class="player-wrapper">
                     <iframe
-                        src="https://open.spotify.com/embed/track/${data.song.track_id}"
+                        title="Deezer player"
+                        src="https://widget.deezer.com/widget/auto/track/${encodeURIComponent(data.song.track_id)}"
                         width="100%"
                         height="152"
                         frameBorder="0"
-                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        allowtransparency="true"
+                        allow="encrypted-media; clipboard-write"
                         loading="lazy">
                     </iframe>
                 </div>
