@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from services.spotify_service import get_song_by_emotion
+from services.music_service import get_song_by_emotion
 from services.emotion_service import detect_emotion
 
 router = APIRouter()
